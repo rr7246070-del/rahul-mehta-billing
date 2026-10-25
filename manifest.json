@@ -1,0 +1,19 @@
+{
+  "name": "Easy Billing Online",
+  "short_name": "Easy Billing",
+  "start_url": "./// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDoJMqNLKs4SRZd5dV6DBMc09v3AwvA3uQ",
+  authDomain: "mehta-billing.firebaseapp.com",
+  projectId: "mehta-billing",
+  storageBucket: "mehta-billing.firebasestorage.app",
+  messagingSenderId: "1069300741794",
+  appId: "1:1069300741794:web:8b25d498c5620e3b1989fb",
+  measurementId: "G-4897XR3HQ3"
+};
+",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#182746",
+  "description": "Item-wise billing, invoice printing and online backup"
+}

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#182746"><link rel="manifest" href="manifest.json">
+<title>Easy Billing Online</title>
+<style>
+:root{--navy:#182746;--blue:#2e5aac;--gold:#f4c542;--bg:#f4f6fb;--ink:#172033;--muted:#68748a;--line:#dce3ef;--green:#16794b;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Devanagari",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:linear-gradient(120deg,#182746,#304f88);color:white;padding:16px}.head{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-size:22px;font-weight:800}.brand span{color:var(--gold)}.sub{font-size:12px;color:#dbe5ff;margin-top:4px}
+main{max-width:1100px;margin:18px auto;padding:0 14px 32px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:15px;box-shadow:0 4px 14px #17203308}
+h2{font-size:19px;margin:0 0 14px;color:var(--navy)}h3{font-size:15px;margin:0 0 10px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;color:var(--muted);font-weight:700}
+input,select{width:100%;border:1px solid #cbd5e4;border-radius:8px;padding:10px;font:inherit;background:#fff;min-width:0}button{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer;font-size:14px}.primary{background:var(--blue);color:#fff}.success{background:var(--green);color:white}.secondary{background:#e9eef7;color:#243654}.danger{background:#ffebe9;color:var(--red)}.gold{background:var(--gold);color:#172033}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{background:#e6ebf5;color:#253754}.tab.active{background:var(--gold);color:#172033}
+table{width:100%;border-collapse:collapse}th{background:#edf2fa;text-align:left;font-size:12px}th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}td input,td select{padding:7px}.wrap{overflow-x:auto}.items{min-width:650px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:15px}.sum{background:#f6f8fc;border:1px solid var(--line);padding:12px;border-radius:10px}.sum span{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.sum strong{font-size:17px}.sum.total{background:#fff7d8}.hidden{display:none!important}.muted{font-size:12px;color:var(--muted);line-height:1.5}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.status{font-size:12px;background:#e3f5e9;color:#12613b;padding:6px 9px;border-radius:20px}.auth{max-width:460px;margin:28px auto}.notice{background:#f5f8ff;border:1px dashed #bdcce7;padding:10px;border-radius:9px;font-size:12px;color:#536079;line-height:1.5;margin-top:12px}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.kpi{padding:14px;border:1px solid var(--line);border-radius:10px}.kpi strong{display:block;font-size:20px;margin-top:5px}.search{max-width:300px}.empty{text-align:center;color:var(--muted);padding:22px}
+@media(max-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{grid-template-columns:repeat(2,1fr)}.kpis{grid-template-columns:1fr}.panel{padding:13px}}@media(max-width:440px){.grid{grid-template-columns:1fr}}
+@media print{header,.tabs,.no-print,#savedPanel,#ledgerPanel,#authPanel{display:none!important}body{background:#fff}main{padding:0;margin:0}.panel{border:0;box-shadow:none;padding:0}#invoicePanel{display:block!important}.grid{grid-template-columns:repeat(4,1fr)}.items th,.items td{border:1px solid #aaa}.sum{background:#fff!important}}
+</style>
+</head>
+<body>
+<header><div class="head"><div><div class="brand">Easy <span>Billing</span></div><div class="sub">Online Backup · Item-wise Bill · Udhar Khata</div></div><div id="cloudStatus" class="sub">Cloud status: login required</div></div></header>
+<main>
+<section id="authPanel" class="panel auth">
+<h2>Email से Login / Register</h2>
+<div class="field"><label>Email</label><input id="email" type="email" placeholder="aapka@email.com" autocomplete="email"></div>
+<div class="field" style="margin-top:10px"><label>Password (कम-से-कम 6 अक्षर)</label><input id="password" type="password" placeholder="Password" autocomplete="current-password"></div>
+<div class="actions"><button id="loginBtn" class="primary">Login</button><button id="registerBtn" class="success">नया Account बनाएँ</button></div>
+<div class="actions"><button id="resetBtn" class="secondary">Password भूल गए?</button></div>
+<p id="authMessage" class="muted"></p>
+<div class="notice"><b>पहली बार सेटअप जरूरी है:</b> इस ऐप को online चलाने के लिए Firebase project की configuration जोड़नी होगी। नीचे README में step-by-step तरीका है। Firebase का free tier उपलब्ध है, लेकिन usage limits और terms लागू होते हैं।</div>
+</section>
+
+<section id="appPanel" class="hidden">
+<div class="panel no-print"><div class="row"><div><b id="signedInAs"></b><div class="muted">आपके बिल आपके account में cloud पर sync होंगे।</div></div><div class="actions"><span id="syncStatus" class="status">Sync तैयार</span><button id="logoutBtn" class="danger">Logout</button></div></div></div>
+<div class="tabs no-print"><button class="tab active" data-tab="invoicePanel">🧾 नया बिल</button><button class="tab" data-tab="savedPanel">📚 Saved Bills</button><button class="tab" data-tab="ledgerPanel">📒 दुकानदार का खाता</button></div>
+<section id="invoicePanel" class="panel">
+<div class="row"><h2>खरीदारी का बिल / Purchase Invoice</h2><span class="status">Auto Calculation</span></div>
+<div class="grid">
+<div class="field"><label>दुकानदार का नाम *</label><input id="supplier" list="suppliers" placeholder="दुकानदार का नाम"><datalist id="suppliers"></datalist></div>
+<div class="field"><label>Invoice No.</label><input id="invoiceNo"></div>
+<div class="field"><label>बिल की तारीख</label><input id="date" type="date"></div>
+<div class="field"><label>मोबाइल (वैकल्पिक)</label><input id="phone" placeholder="मोबाइल नंबर"></div>
+</div>
+<div class="wrap" style="margin-top:16px"><table class="items"><thead><tr><th>क्र.</th><th>सामान</th><th>मात्रा</th><th>यूनिट</th><th>रेट ₹</th><th>कुल ₹</th><th class="no-print">हटाएँ</th></tr></thead><tbody id="itemRows"></tbody></table></div>
+<div class="actions no-print"><button id="addItem" class="secondary">＋ सामान जोड़ें</button><button id="newBill" class="secondary">नया/खाली बिल</button></div>
+<div class="grid" style="margin-top:14px"><div class="field"><label>अन्य खर्च ₹</label><input id="other" type="number" min="0" value="0"></div><div class="field"><label>अभी भुगतान ₹</label><input id="paid" type="number" min="0" value="0"></div><div class="field"><label>नोट</label><input id="note" placeholder="वैकल्पिक"></div></div>
+<div class="summary"><div class="sum"><span>सामान की कुल कीमत</span><strong id="subtotal">₹0.00</strong></div><div class="sum"><span>अन्य खर्च</span><strong id="otherTotal">₹0.00</strong></div><div class="sum total"><span>कुल बिल</span><strong id="grand">₹0.00</strong></div><div class="sum"><span>इस बिल का बकाया</span><strong id="balance">₹0.00</strong></div></div>
+<div class="actions no-print"><button id="saveBtn" class="success">💾 SAVE INVOICE</button><button id="printBtn" class="primary">🖨️ Print / PDF</button></div>
+<p class="muted">Save दबाने पर यह बिल आपके login account के cloud database में सेव होगा। केवल अपने account में login करें।</p>
+</section>
+<section id="savedPanel" class="panel hidden"><div class="row"><h2>Saved Bills</h2><input id="billSearch" class="search" placeholder="बिल नंबर या दुकानदार खोजें"></div><div class="wrap"><table><thead><tr><th>तारीख</th><th>बिल नंबर</th><th>दुकानदार</th><th>कुल</th><th>भुगतान</th><th>बकाया</th><th class="no-print">काम</th></tr></thead><tbody id="savedRows"></tbody></table></div><div id="savedEmpty" class="empty">अभी कोई बिल सेव नहीं है।</div></section>
+<section id="ledgerPanel" class="panel hidden"><h2>दुकानदार का खाता</h2><div class="kpis"><div class="kpi"><small>कुल खरीदारी</small><strong id="kpiTotal">₹0.00</strong></div><div class="kpi"><small>कुल भुगतान</small><strong id="kpiPaid">₹0.00</strong></div><div class="kpi"><small>कुल बकाया</small><strong id="kpiDue">₹0.00</strong></div></div><div class="wrap"><table><thead><tr><th>दुकानदार</th><th>कुल बिल</th><th>भुगतान</th><th>बकाया</th><th>बिल संख्या</th></tr></thead><tbody id="ledgerRows"></tbody></table></div><p class="muted">यह सारांश सेव किए गए बिलों के हिसाब से है। अलग से पुराने उधार का बाद में भुगतान दर्ज करने की सुविधा इस starter version में शामिल नहीं है।</p></section>
+</section>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* IMPORTANT: Paste your own Firebase web config here (see README). */
+const firebaseConfig = {
+  apiKey: "AIzaSyDoJMqNLKs4SRZd5dV6DBMc09v3AwvA3uQ",
+  authDomain: "mehta-billing.firebaseapp.com",
+  projectId: "mehta-billing",
+  storageBucket: "mehta-billing.firebasestorage.app",
+  messagingSenderId: "1069300741794",
+  appId: "1:1069300741794:web:195d030c095970031989fb"
+};
+const configured = !Object.values(firebaseConfig).some(v => String(v).startsWith("PASTE_"));
+let auth, db, currentUser=null, bills=[];
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+(Number(n)||0).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const today=()=>new Date().toISOString().slice(0,10);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function msg(t){$("authMessage").textContent=t}
+function status(t){$("syncStatus").textContent=t;$("cloudStatus").textContent=t}
+if(configured){const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app)}else{msg("Firebase config अभी नहीं जोड़ी गई है। ZIP के README में setup देखें।");$("loginBtn").disabled=true;$("registerBtn").disabled=true;$("resetBtn").disabled=true}
+$("loginBtn").onclick=async()=>{try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);msg("")}catch(e){msg(readableError(e))}};
+$("registerBtn").onclick=async()=>{try{await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);msg("Account बन गया।")}catch(e){msg(readableError(e))}};
+$("resetBtn").onclick=async()=>{try{if(!$("email").value.trim())return msg("पहले email भरें।");await sendPasswordResetEmail(auth,$("email").value.trim());msg("Password reset link आपके email पर भेज दिया गया है।")}catch(e){msg(readableError(e))}};
+$("logoutBtn").onclick=()=>signOut(auth);
+function readableError(e){const c=e?.code||"";return ({ "auth/invalid-email":"Email सही नहीं है।","auth/weak-password":"Password कम-से-कम 6 अक्षर का रखें।","auth/email-already-in-use":"इस email से account पहले से है। Login करें।","auth/invalid-credential":"Email या password गलत है।","auth/network-request-failed":"Internet connection जाँचें।"})[c]||e.message||"Error हुआ।"}
+onAuthStateChanged(auth,async user=>{currentUser=user;$("authPanel").classList.toggle("hidden",!!user);$("appPanel").classList.toggle("hidden",!user);if(user){$("signedInAs").textContent=user.email;await loadBills();status("Cloud synced")}else{bills=[];status("Login required")}});
+async function loadBills(){status("Cloud से डेटा लोड हो रहा है…");try{const snap=await getDocs(collection(db,"users",currentUser.uid,"bills"));bills=snap.docs.map(d=>({id:d.id,...d.data()}));renderAll();status("Cloud synced")}catch(e){status("Sync error");alert("Bills load नहीं हुए: "+e.message)}}
+async function cloudSave(b){status("Cloud पर सेव हो रहा है…");await setDoc(doc(db,"users",currentUser.uid,"bills",b.id),b);const i=bills.findIndex(x=>x.id===b.id);if(i>=0)bills[i]=b;else bills.push(b);renderAll();status("Cloud synced")}
+async function cloudDelete(id){if(!confirm("यह bill हमेशा के लिए delete करना है?"))return;try{await deleteDoc(doc(db,"users",currentUser.uid,"bills",id));bills=bills.filter(b=>b.id!==id);renderAll();status("Cloud synced")}catch(e){alert(e.message)}}
+function addItem(x={}){const tr=document.createElement("tr");tr.innerHTML=`<td class="rownum"></td><td><input class="iname" placeholder="सामान का नाम" value="${esc(x.name||"")}"></td><td><input class="qty" type="number" min="0" step="any" placeholder="0" value="${esc(x.qty??"")}"></td><td><select class="unit">${["Pcs","Kg","Gram","Litre","Packet","Bora","Meter","Box","Dozen","Other"].map(u=>`<option ${x.unit===u?"selected":""}>${u}</option>`).join("")}</select></td><td><input class="rate" type="number" min="0" step="any" value="${esc(x.rate??"")}" placeholder="0"></td><td class="amount">${money((Number(x.qty)||0)*(Number(x.rate)||0))}</td><td class="no-print"><button class="danger" type="button">✕</button></td>`;$("itemRows").append(tr);tr.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",calc));tr.querySelector("button").onclick=()=>{tr.remove();renum();calc()};renum();calc()}
+function renum(){[...$("itemRows").rows].forEach((r,i)=>r.querySelector(".rownum").textContent=i+1)}
+function items(){return [...$("itemRows").rows].map(r=>({name:r.querySelector(".iname").value.trim(),qty:Number(r.querySelector(".qty").value)||0,unit:r.querySelector(".unit").value,rate:Number(r.querySelector(".rate").value)||0,amount:(Number(r.querySelector(".qty").value)||0)*(Number(r.querySelector(".rate").value)||0)})).filter(x=>x.name)}
+function calc(){let sub=0;[...$("itemRows").rows].forEach(r=>{const a=(Number(r.querySelector(".qty").value)||0)*(Number(r.querySelector(".rate").value)||0);sub+=a;r.querySelector(".amount").textContent=money(a)});let other=Number($("other").value)||0,grand=sub+other,paid=Number($("paid").value)||0;$("subtotal").textContent=money(sub);$("otherTotal").textContent=money(other);$("grand").textContent=money(grand);$("balance").textContent=money(grand-paid)}
+function clearForm(){["supplier","phone","note"].forEach(id=>$(id).value="");$("date").value=today();$("invoiceNo").value=nextNo();$("other").value=0;$("paid").value=0;$("itemRows").innerHTML="";for(let i=0;i<5;i++)addItem();calc()}
+function nextNo(){let max=0;bills.forEach(b=>{let m=String(b.invoiceNo||"").match(/(\\d+)$/);if(m)max=Math.max(max,+m[1])});return "INV-"+String(max+1).padStart(3,"0")}
+$("addItem").onclick=()=>addItem();$("other").oninput=calc;$("paid").oninput=calc;$("newBill").onclick=()=>{if(confirm("नया खाली बिल बनाएं?"))clearForm()};
+$("saveBtn").onclick=async()=>{if(!currentUser)return alert("पहले login करें");const supplier=$("supplier").value.trim(),its=items(),invoiceNo=$("invoiceNo").value.trim();if(!supplier)return alert("दुकानदार का नाम भरें");if(!its.length)return alert("कम-से-कम एक सामान भरें");if(!invoiceNo)return alert("Invoice No. भरें");let existing=bills.find(b=>b.invoiceNo===invoiceNo);if(existing&&!confirm("यह invoice number पहले से मौजूद है। नया रिकॉर्ड बनाएं?"))return;let subtotal=its.reduce((s,x)=>s+x.amount,0),other=Number($("other").value)||0,grand=subtotal+other,paid=Number($("paid").value)||0;const b={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(),invoiceNo,supplier,phone:$("phone").value.trim(),date:$("date").value||today(),items:its,other,subtotal,grand,paid,balance:grand-paid,note:$("note").value.trim(),savedAt:new Date().toISOString()};try{await cloudSave(b);alert("बिल online account में सेव हो गया।");clearForm()}catch(e){status("Save failed");alert("सेव नहीं हुआ: "+e.message)}};
+$("printBtn").onclick=()=>{calc();if(!$("supplier").value.trim())return alert("दुकानदार का नाम भरें");window.print()};
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===btn));["invoicePanel","savedPanel","ledgerPanel"].forEach(id=>$(id).classList.toggle("hidden",id!==btn.dataset.tab));if(btn.dataset.tab==="savedPanel")renderSaved();if(btn.dataset.tab==="ledgerPanel")renderLedger()});
+function renderAll(){renderSaved();renderLedger();$("suppliers").innerHTML=[...new Set(bills.map(b=>b.supplier))].map(n=>`<option value="${esc(n)}">`).join("")}
+function renderSaved(){const q=($("billSearch").value||"").toLowerCase(),arr=[...bills].sort((a,b)=>(b.savedAt||"").localeCompare(a.savedAt||"")).filter(b=>(b.supplier+" "+b.invoiceNo).toLowerCase().includes(q));$("savedRows").innerHTML=arr.map(b=>`<tr><td>${esc(b.date)}</td><td>${esc(b.invoiceNo)}</td><td>${esc(b.supplier)}</td><td>${money(b.grand)}</td><td>${money(b.paid)}</td><td>${money(b.balance)}</td><td class="no-print"><button class="secondary" onclick="window.editBill('${b.id}')">देखें</button> <button class="danger" onclick="window.delBill('${b.id}')">हटाएँ</button></td></tr>`).join("");$("savedEmpty").classList.toggle("hidden",arr.length>0)}
+window.editBill=id=>{let b=bills.find(x=>x.id===id);if(!b)return;document.querySelector('[data-tab="invoicePanel"]').click();$("supplier").value=b.supplier;$("phone").value=b.phone||"";$("invoiceNo").value=b.invoiceNo;$("date").value=b.date;$("other").value=b.other||0;$("paid").value=b.paid||0;$("note").value=b.note||"";$("itemRows").innerHTML="";b.items.forEach(addItem);calc()};
+window.delBill=cloudDelete;$("billSearch").oninput=renderSaved;
+function renderLedger(){let m={},tot=0,paid=0,due=0;bills.forEach(b=>{let x=m[b.supplier]||(m[b.supplier]={total:0,paid:0,due:0,count:0});x.total+=+b.grand||0;x.paid+=+b.paid||0;x.due+=+b.balance||0;x.count++;tot+=+b.grand||0;paid+=+b.paid||0;due+=+b.balance||0});$("kpiTotal").textContent=money(tot);$("kpiPaid").textContent=money(paid);$("kpiDue").textContent=money(due);$("ledgerRows").innerHTML=Object.entries(m).sort((a,b)=>a[0].localeCompare(b[0])).map(([n,x])=>`<tr><td>${esc(n)}</td><td>${money(x.total)}</td><td>${money(x.paid)}</td><td>${money(x.due)}</td><td>${x.count}</td></tr>`).join("")}
+$("date").value=today();$("invoiceNo").value="INV-001";for(let i=0;i<5;i++)addItem();
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
+</script>
+</body></html>
